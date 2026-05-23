@@ -56,9 +56,8 @@ func _physics_process(_delta):
 	var step_penalty = -0.01
 	
 	for i in range(agents.size()):
-		agents[i].last_reward = step_penalty
 		_apply_movement(agents[i], agents[i].current_action)
-		agents[i].last_reward += _apply_interaction(agents[i], agents[i].current_action)
+		agents[i].last_reward += step_penalty + _apply_interaction(agents[i], agents[i].current_action)
 
 	if gold_mined or current_step >= MAX_STEPS:
 		needs_reset = true
@@ -72,7 +71,9 @@ func set_agent_action(agent_id: int, action: int):
 	agents[agent_id].current_action = action
 
 func get_agent_reward(agent_id: int) -> float:
-	return agents[agent_id].last_reward
+	var r = agents[agent_id].last_reward
+	agents[agent_id].last_reward = 0.0
+	return r
 
 func is_env_done() -> bool:
 	return needs_reset
