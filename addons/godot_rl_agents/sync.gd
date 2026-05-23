@@ -325,7 +325,8 @@ func _set_agent_mode(agent: Node):
 
 
 func _get_agents():
-	all_agents = get_tree().get_nodes_in_group("AGENT")
+	all_agents.clear()
+	all_agents.append_array(get_tree().get_nodes_in_group("AGENT"))
 	for agent in all_agents:
 		_set_agent_mode(agent)
 
@@ -473,6 +474,7 @@ func handle_message() -> bool:
 		print("resetting all agents")
 		_reset_agents()
 		just_reset = true
+		n_action_steps = 0
 		get_tree().set_pause(false)
 		#print("resetting forcing draw")
 #        RenderingServer.force_draw()

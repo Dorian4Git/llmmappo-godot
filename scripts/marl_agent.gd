@@ -16,6 +16,9 @@ func get_obs() -> Dictionary:
 	if env_ref == null:
 		print("ERROR: env_ref is null in get_obs for agent: ", agent_id)
 		return {"obs": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
+	if needs_reset:
+		if env_ref.has_method("reset"):
+			env_ref.reset()
 	var obs_array = env_ref.get_agent_obs(agent_id)
 	if obs_array == null:
 		print("ERROR: get_agent_obs returned null for agent: ", agent_id)

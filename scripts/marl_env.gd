@@ -38,7 +38,17 @@ func _ready():
 # The Physics Engine Loop (Driven by PyTorch via Sync)
 # ---------------------------------------------------------
 func _physics_process(_delta):
-	if needs_reset:
+	var agent_wants_reset = false
+	var a0_needs = false
+	var a1_needs = false
+	if has_node("Agent0/AIController2D"):
+		a0_needs = get_node("Agent0/AIController2D").needs_reset
+		if a0_needs: agent_wants_reset = true
+	if has_node("Agent1/AIController2D"):
+		a1_needs = get_node("Agent1/AIController2D").needs_reset
+		if a1_needs: agent_wants_reset = true
+
+	if needs_reset or agent_wants_reset:
 		reset()
 		return
 
@@ -101,9 +111,14 @@ func reset():
 	gold_mined = false
 	needs_reset = false
 	
+	if has_node("Agent0/AIController2D"):
+		get_node("Agent0/AIController2D").reset()
+	if has_node("Agent1/AIController2D"):
+		get_node("Agent1/AIController2D").reset()
+	
 	agents[0].pos = Vector2(5, 5)
-	agents[0].inventory = {"wood": 0, "stone": 0, "pickaxe": 0}
 	agents[1].pos = Vector2(55, 5)
+	agents[0].inventory = {"wood": 0, "stone": 0, "pickaxe": 0}
 	agents[1].inventory = {"wood": 0, "stone": 0, "pickaxe": 0}
 	
 	for a in agents:
@@ -135,14 +150,17 @@ func _apply_interaction(agent: Dictionary, action: int) -> float:
 		if agent.id == 0: # Only Agent 0 (Lumberjack) can collect Wood
 			agent.inventory.wood += 1
 			wood_collected = true
+			reward += 2.0 # Milestone reward
 	elif not stone_collected and agent.pos.distance_to(zone_stone_pos) < dist_threshold:
 		if agent.id == 1: # Only Agent 1 (Miner) can collect Stone
 			agent.inventory.stone += 1
 			stone_collected = true
+			reward += 2.0 # Milestone reward
 	elif wood_collected and stone_collected and not pickaxe_crafted and agent.pos.distance_to(zone_workbench_pos) < dist_threshold:
 		# Either agent can use the Workbench
 		agent.inventory.pickaxe += 1
 		pickaxe_crafted = true
+		reward += 3.0 # Milestone reward
 	elif pickaxe_crafted and not gold_mined and agent.pos.distance_to(zone_gold_pos) < dist_threshold:
 		if agent.id == 1: # Only Agent 1 (Miner) can mine Gold
 			gold_mined = true
