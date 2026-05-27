@@ -117,8 +117,14 @@ func reset():
 	if has_node("Agent1/AIController2D"):
 		get_node("Agent1/AIController2D").reset()
 	
-	agents[0].pos = Vector2(5, 5)
-	agents[1].pos = Vector2(55, 5)
+	# Randomize starting positions within role-appropriate regions.
+	# A0 (Lumberjack) spawns near the Wood zone [10,10].
+	# A1 (Miner)      spawns near the Stone zone [50,10].
+	# This makes the Workbench 'closest agent' decision genuinely dynamic:
+	# the LLM reads actual positions; the cache always picks A0 (sub-optimal ~50%).
+	agents[0].pos = Vector2(randi_range(2, 18), randi_range(2, 18))
+	agents[1].pos = Vector2(randi_range(42, 58), randi_range(2, 18))
+	
 	agents[0].inventory = {"wood": 0, "stone": 0, "pickaxe": 0}
 	agents[1].inventory = {"wood": 0, "stone": 0, "pickaxe": 0}
 	
